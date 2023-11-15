@@ -33,11 +33,11 @@ export default {
 			});
 		}
 
-		// const upgradeHeader = request.headers.get('Upgrade')
+		const upgradeHeader = request.headers.get('Upgrade')
 
-		// if (upgradeHeader || upgradeHeader === 'websocket') {
-		// 	return await fetch(env.RPC_URL, request);
-		// }
+		if (upgradeHeader || upgradeHeader === 'websocket') {
+			return await fetch(env.RPC_URL, request);
+		}
 
 		const { search } = new URL(request.url);
 
@@ -47,7 +47,7 @@ export default {
 			body: payload || null,
 			headers: {
 				'Content-Type': 'application/json',
-				'X-GFX-Cloudflare-Proxy': 'true',
+				'X-Helius-Cloudflare-Proxy': 'true',
 			},
 		});
 
