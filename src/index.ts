@@ -1,6 +1,7 @@
 interface Env {
 	CORS_ALLOW_ORIGIN: string;
-	HELIUS_API_KEY: string;
+	RPC_URL: string;
+	DEV_RPC_URL: string;
 }
 
 export default {
@@ -17,6 +18,7 @@ export default {
 			'Access-Control-Allow-Methods': 'GET, HEAD, POST, PUT, OPTIONS',
 			'Access-Control-Allow-Headers': '*',
 		};
+		
 		if (supportedDomains) {
 			const origin = request.headers.get('Origin');
 			if (
@@ -41,11 +43,15 @@ export default {
 		if (upgradeHeader || upgradeHeader === 'websocket') {
 			return await fetch(env.RPC_URL, request);
 		}
-
-		const { search } = new URL(request.url);
+		
+		// calculates if origin is prod - splites all other traffic to dev rpc
+		const prod = env.RPC_URL.split(',');
+		const prodOrigin = prod[0];
+		const prodURL = prod[1];
+		const isProd = origin === prodOrigin;
 
 		const payload = await request.text();
-		const proxyRequest = new Request(`${env.RPC_URL}${search ? `${search}` : ''}`, {
+		const proxyRequest = new Request(isProd ? prodURL : env.DEV_RPC_URL, {
 			method: request.method,
 			body: payload || null,
 			headers: {
