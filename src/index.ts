@@ -19,7 +19,10 @@ export default {
 		};
 		if (supportedDomains) {
 			const origin = request.headers.get('Origin');
-			if (origin && supportedDomains.includes(origin)) {
+			if (
+				origin &&
+				(supportedDomains.includes(origin) || origin.includes('doi1f799swne9.amplifyapp.com'))
+			) {
 				corsHeaders['Access-Control-Allow-Origin'] = origin;
 			}
 		} else {
