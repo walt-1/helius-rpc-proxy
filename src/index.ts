@@ -18,9 +18,9 @@ export default {
 			'Access-Control-Allow-Methods': 'GET, HEAD, POST, PUT, OPTIONS',
 			'Access-Control-Allow-Headers': '*',
 		};
+		const origin = request.headers.get('Origin');
 		
 		if (supportedDomains) {
-			const origin = request.headers.get('Origin');
 			if (
 				origin &&
 				(supportedDomains.includes(origin) || origin.includes('doi1f799swne9.amplifyapp.com'))
@@ -38,20 +38,21 @@ export default {
 			});
 		}
 
-		const upgradeHeader = request.headers.get('Upgrade')
-
-		if (upgradeHeader || upgradeHeader === 'websocket') {
-			return await fetch(env.RPC_URL, request);
-		}
-		
 		// calculates if origin is prod - splites all other traffic to dev rpc
 		const prod = env.RPC_URL.split(',');
 		const prodOrigin = prod[0];
 		const prodURL = prod[1];
 		const isProd = origin === prodOrigin;
 
+		const url = isProd ? prodURL : env.DEV_RPC_URL;
+		
+		const upgradeHeader = request.headers.get('Upgrade');
+		if (upgradeHeader || upgradeHeader === 'websocket') {
+			return await fetch(url, request);
+		}
+		
 		const payload = await request.text();
-		const proxyRequest = new Request(isProd ? prodURL : env.DEV_RPC_URL, {
+		const proxyRequest = new Request(url, {
 			method: request.method,
 			body: payload || null,
 			headers: {
