@@ -1,7 +1,9 @@
+const fetchWithRetries = require('./utils/fetchWithRetries');
+const segment = require('./utils/segment');
+
 interface Env {
 	CORS_ALLOW_ORIGIN: string;
 	RPC_URL: string;
-	DEV_RPC_URL: string;
 }
 
 export default {
@@ -19,7 +21,7 @@ export default {
 			'Access-Control-Allow-Headers': '*',
 		};
 		const origin = request.headers.get('Origin');
-		
+
 		if (supportedDomains) {
 			if (
 				origin &&
@@ -39,29 +41,29 @@ export default {
 		}
 
 		// calculates if origin is prod - splites all other traffic to dev rpc
-		const prod = env.RPC_URL.split(',');
-		const prodOrigin = prod[0];
-		const prodURL = prod[1];
-		const isProd = origin === prodOrigin;
+		const RPC_POOL = env.RPC_URL.split(',');
+		console.log(RPC_POOL);
 
-		const url = isProd ? prodURL : env.DEV_RPC_URL;
-		
+		const curSegment = segment(RPC_POOL.length);
+		console.log(`The current time falls into ${curSegment} of ${RPC_POOL.length} of the today.`);
+
 		const upgradeHeader = request.headers.get('Upgrade');
 		if (upgradeHeader || upgradeHeader === 'websocket') {
-			return await fetch(url, request);
+			return await fetch(RPC_POOL[curSegment], request);
 		}
-		
+
 		const payload = await request.text();
-		const proxyRequest = new Request(url, {
+		const options = {
 			method: request.method,
 			body: payload || null,
 			headers: {
 				'Content-Type': 'application/json',
 				'X-Helius-Cloudflare-Proxy': 'true',
 			},
-		});
+		};
 
-		return await fetch(proxyRequest).then(res => {
+		// curSegment targets given rpc url index
+		return await fetchWithRetries(RPC_POOL, options, curSegment - 1, new Date()).then(res => {
 			return new Response(res.body, {
 				status: res.status,
 				headers: corsHeaders,
