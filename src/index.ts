@@ -42,10 +42,9 @@ export default {
 
 		// calculates if origin is prod - splites all other traffic to dev rpc
 		const RPC_POOL = env.RPC_URL.split(',');
-		console.log(RPC_POOL);
 
 		const curSegment = segment(RPC_POOL.length);
-		console.log(`The current time falls into ${curSegment} of ${RPC_POOL.length} of the today.`);
+		console.log(`The current time falls into ${curSegment} of ${RPC_POOL.length} millisecond of current second.`);
 
 		const upgradeHeader = request.headers.get('Upgrade');
 		if (upgradeHeader || upgradeHeader === 'websocket') {

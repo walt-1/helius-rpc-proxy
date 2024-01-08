@@ -3,5 +3,4 @@ main = "./src/index.ts"
 compatibility_date = "2022-05-03"
 
 [vars]
-CORS_ALLOW_ORIGIN = "https://localhost:8787"
-RPC_URL = "https://evocative-convincing-wind.solana-mainnet.quiknode.pro/6b92076dfb9eb4746983deec1b4fb6ca194a5fc3/,https://spring-solitary-hill.solana-mainnet.quiknode.pro/47f6354484404d2d7676fb64ab684691c87089e6/,https://spring-solitary-hill.solana-mainnet.quiknode.pro/47f6354484404d2d7676fb64ab684691c87089e6/,https://mainnet.helius-rpc.com/?api-key=61b0024d-507e-419e-bcad-77c33efebd8f"
+CORS_ALLOW_ORIGIN = "https://app.goosefx.io,https://app.staging.goosefx.io,http://localhost:3000,https://vesting.goosefx.io,https://nestquest.io"

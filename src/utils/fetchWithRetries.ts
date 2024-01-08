@@ -1,4 +1,4 @@
-const DELAY = 750;
+const DELAY = 300;
 
 const fetchWithRetries = async (rpcURLs: string[], options: any, index: number, prevTime: Date) => {
 	// resets index to 0 if all urls in array have been tried
@@ -8,12 +8,11 @@ const fetchWithRetries = async (rpcURLs: string[], options: any, index: number, 
 	const curTime = new Date().getTime();
 	const elapse = (curTime - prevTime.getTime()) / 1000;
 	if (elapse >= 7) {
-		return new Response('service timed out', { status: 500 });
+		return new Response('GFX Proxy Service Timed Out', { status: 500 });
 	}
 
 	const request = new Request(rpcURLs[index], options);
 
-	console.log(index);
 	try {
 		const response = await fetch(request);
 		if (response.ok) {
