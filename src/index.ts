@@ -40,12 +40,12 @@ export default {
 			});
 		}
 
+		const timestamp = new Date()
 		// calculates if origin is prod - splites all other traffic to dev rpc
 		const RPC_POOL = env.RPC_URL.split(',');
 
-		const curSegment = segment(RPC_POOL.length);
-		console.log(`The current time falls into ${curSegment} of ${RPC_POOL.length} millisecond of current second.`);
-
+		const curSegment = segment(RPC_POOL.length, timestamp);
+		
 		const upgradeHeader = request.headers.get('Upgrade');
 		if (upgradeHeader || upgradeHeader === 'websocket') {
 			return await fetch(RPC_POOL[curSegment], request);
@@ -62,7 +62,7 @@ export default {
 		};
 
 		// curSegment targets given rpc url index
-		return await fetchWithRetries(RPC_POOL, options, curSegment - 1, new Date()).then(res => {
+		return await fetchWithRetries(RPC_POOL, options, curSegment - 1, timestamp).then(res => {
 			return new Response(res.body, {
 				status: res.status,
 				headers: corsHeaders,

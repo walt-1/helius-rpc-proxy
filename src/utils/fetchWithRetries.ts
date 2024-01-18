@@ -1,4 +1,4 @@
-const DELAY = 300;
+const DELAY = 100;
 
 const fetchWithRetries = async (rpcURLs: string[], options: any, index: number, prevTime: Date) => {
 	// resets index to 0 if all urls in array have been tried
