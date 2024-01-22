@@ -1,9 +1,11 @@
 const fetchWithRetries = require('./utils/fetchWithRetries');
 const segment = require('./utils/segment');
+const Logger = require('./logger');
 
 interface Env {
 	CORS_ALLOW_ORIGIN: string;
 	RPC_URL: string;
+	LOGGING_URL: string
 }
 
 export default {
@@ -48,7 +50,7 @@ export default {
 		
 		const upgradeHeader = request.headers.get('Upgrade');
 		if (upgradeHeader || upgradeHeader === 'websocket') {
-			return await fetch(RPC_POOL[curSegment], request);
+			return await fetch(RPC_POOL[curSegment - 1], request);
 		}
 
 		const payload = await request.text();
@@ -61,12 +63,16 @@ export default {
 			},
 		};
 
+		// CREATES LOGGER
+		const logClient = new Logger(env.LOGGING_URL);
 		// curSegment targets given rpc url index
-		return await fetchWithRetries(RPC_POOL, options, curSegment - 1, timestamp).then(res => {
-			return new Response(res.body, {
-				status: res.status,
-				headers: corsHeaders,
-			});
-		});
+		return await fetchWithRetries(RPC_POOL, options, curSegment - 1, timestamp, logClient).then(
+			res => {
+				return new Response(res.body, {
+					status: res.status,
+					headers: corsHeaders,
+				});
+			}
+		);
 	},
 };

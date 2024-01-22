@@ -4,3 +4,5 @@ compatibility_date = "2022-05-03"
 
 [vars]
 CORS_ALLOW_ORIGIN = "https://app.goosefx.io,https://app.staging.goosefx.io,http://localhost:3000,https://vesting.goosefx.io,https://nestquest.io"
+RPC_URL = ""
+LOGGING_URL = ""
