@@ -17,6 +17,21 @@ export default {
 		// For example, if you wanted to allow requests from `https://example.com`, you would change the
 		// header to `https://example.com`. Multiple domains are supported by verifying that the request
 		// originated from one of the domains in the `CORS_ALLOW_ORIGIN` environment variable.
+
+		const url: URL = new URL(request.url)
+		if (url.pathname !== '/' || url.search !== '' || url.hash !== '') {
+			return new Response('Bad Request: Invalid or malicious URL', {
+				status: 400
+			});
+		}
+
+		const headers = request.headers.get('content-type');
+		if (headers !== 'application/json') {
+			return new Response('Invalid content-type, this application only supports application/json', {
+				status: 415,
+			});
+		}
+
 		const supportedDomains = env.CORS_ALLOW_ORIGIN ? env.CORS_ALLOW_ORIGIN.split(',') : undefined;
 		const corsHeaders: Record<string, string> = {
 			'Access-Control-Allow-Methods': 'GET, HEAD, POST, PUT, OPTIONS',
