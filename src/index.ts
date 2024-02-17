@@ -17,18 +17,15 @@ export default {
 		// For example, if you wanted to allow requests from `https://example.com`, you would change the
 		// header to `https://example.com`. Multiple domains are supported by verifying that the request
 		// originated from one of the domains in the `CORS_ALLOW_ORIGIN` environment variable.
+		
+		// CREATES LOGGER
+		const logClient = new Logger(env.LOGGING_URL);
 
-		const url: URL = new URL(request.url)
+		const url: URL = new URL(request.url);
 		if (url.pathname !== '/' || url.search !== '' || url.hash !== '') {
+			logClient.log(`JSON RPC URL: ${request.url}`);
 			return new Response('Bad Request: Invalid or malicious URL', {
-				status: 400
-			});
-		}
-
-		const headers = request.headers.get('content-type');
-		if (headers !== 'application/json') {
-			return new Response('Invalid content-type, this application only supports application/json', {
-				status: 415,
+				status: 400,
 			});
 		}
 
@@ -57,12 +54,19 @@ export default {
 			});
 		}
 
-		const timestamp = new Date()
+		const reqContentType = request.headers.get('content-type');
+		if (reqContentType !== 'application/json') {
+			return new Response('Invalid content-type, this application only supports application/json', {
+				status: 415,
+			});
+		}
+
+		const timestamp = new Date();
 		// calculates if origin is prod - splites all other traffic to dev rpc
 		const RPC_POOL = env.RPC_URL.split(',');
 
 		const curSegment = segment(RPC_POOL.length, timestamp);
-		
+
 		const upgradeHeader = request.headers.get('Upgrade');
 		if (upgradeHeader || upgradeHeader === 'websocket') {
 			return await fetch(RPC_POOL[curSegment - 1], request);
@@ -78,8 +82,6 @@ export default {
 			},
 		};
 
-		// CREATES LOGGER
-		const logClient = new Logger(env.LOGGING_URL);
 		// curSegment targets given rpc url index
 		return await fetchWithRetries(RPC_POOL, options, curSegment - 1, timestamp, logClient).then(
 			res => {
