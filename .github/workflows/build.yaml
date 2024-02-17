@@ -2,7 +2,7 @@ name: Build
 on:
   push:
     branches:
-      - main
+      - release/cf
   pull_request:
   repository_dispatch:
 jobs:
