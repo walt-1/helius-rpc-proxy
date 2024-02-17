@@ -33,7 +33,7 @@ export default {
 		}
 
 		const supportedDomains = env.CORS_ALLOW_ORIGIN ? env.CORS_ALLOW_ORIGIN.split(',') : undefined;
-		const corsHeaders: Record<string, string> = {
+		const respHeaders: Record<string, string> = {
 			'Access-Control-Allow-Methods': 'GET, HEAD, POST, PUT, OPTIONS',
 			'Access-Control-Allow-Headers': '*',
 		};
@@ -44,16 +44,16 @@ export default {
 				origin &&
 				(supportedDomains.includes(origin) || origin.includes('doi1f799swne9.amplifyapp.com'))
 			) {
-				corsHeaders['Access-Control-Allow-Origin'] = origin;
+				respHeaders['Access-Control-Allow-Origin'] = origin;
 			}
 		} else {
-			corsHeaders['Access-Control-Allow-Origin'] = '*';
+			respHeaders['Access-Control-Allow-Origin'] = '*';
 		}
 
 		if (request.method === 'OPTIONS') {
 			return new Response(null, {
 				status: 200,
-				headers: corsHeaders,
+				headers: respHeaders,
 			});
 		}
 
@@ -85,7 +85,7 @@ export default {
 			res => {
 				return new Response(res.body, {
 					status: res.status,
-					headers: corsHeaders,
+					headers: respHeaders,
 				});
 			}
 		);
