@@ -69,7 +69,8 @@ export default {
 
 		const upgradeHeader = request.headers.get('Upgrade');
 		if (upgradeHeader || upgradeHeader === 'websocket') {
-			return await fetch(RPC_POOL[curSegment - 1], request);
+			const wsIndex = RPC_POOL.findIndex(i => i.includes('helius'))
+			return await fetch(RPC_POOL[wsIndex !== -1 ? wsIndex : curSegment - 1], request);
 		}
 
 		const payload = await request.text();
