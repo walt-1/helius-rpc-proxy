@@ -54,13 +54,6 @@ export default {
 			});
 		}
 
-		const reqContentType = request.headers.get('content-type');
-		if (reqContentType !== 'application/json') {
-			return new Response('Invalid content-type, this application only supports application/json', {
-				status: 415,
-			});
-		}
-
 		const timestamp = new Date();
 		// calculates if origin is prod - splites all other traffic to dev rpc
 		const RPC_POOL = env.RPC_URL.split(',');
@@ -82,6 +75,16 @@ export default {
 				'X-Helius-Cloudflare-Proxy': 'true',
 			},
 		};
+
+		// const reqContentType = request.headers.get('content-type');
+		// if (reqContentType !== 'application/json') {
+		// 	return new Response(
+		// 		'Invalid content-type, this application only supports application/json',
+		// 		{
+		// 			status: 415,
+		// 		}
+		// 	);
+		// }
 
 		// curSegment targets given rpc url index
 		return await fetchWithRetries(RPC_POOL, options, curSegment - 1, timestamp, logClient).then(
