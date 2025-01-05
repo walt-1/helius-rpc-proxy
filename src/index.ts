@@ -1,5 +1,3 @@
-const fetchWithRetries = require('./utils/fetchWithRetries');
-const segment = require('./utils/segment');
 const Logger = require('./logger');
 
 interface Env {
@@ -57,13 +55,19 @@ export default {
 		const timestamp = new Date();
 		// calculates if origin is prod - splites all other traffic to dev rpc
 		const RPC_POOL = env.RPC_URL.split(',');
-
-		const curSegment = segment(RPC_POOL.length, timestamp);
+		const H_INDEX = RPC_POOL.findIndex(i => i.includes('helius'))
+		const Q_INDEX = RPC_POOL.findIndex(i => i.includes('quiknode'));
 
 		const upgradeHeader = request.headers.get('Upgrade');
 		if (upgradeHeader || upgradeHeader === 'websocket') {
-			const wsIndex = RPC_POOL.findIndex(i => i.includes('helius'))
-			return await fetch(RPC_POOL[wsIndex !== -1 ? wsIndex : curSegment - 1], request);
+			if (H_INDEX !== -1) {
+				return await fetch(RPC_POOL[H_INDEX], request);
+			} else {
+				return new Response('RPC URL is not set in pool for websocket', {
+					status: 500,
+					headers: respHeaders,
+				});
+			}
 		}
 
 		const payload = await request.text();
@@ -71,10 +75,11 @@ export default {
 			method: request.method,
 			body: payload || null,
 			headers: {
-				'Content-Type': 'application/json',
-				'X-Helius-Cloudflare-Proxy': 'true',
+				'Content-Type': 'application/json'
 			},
 		};
+
+		const proxyRequest = new Request(RPC_POOL[Q_INDEX], options);
 
 		// const reqContentType = request.headers.get('content-type');
 		// if (reqContentType !== 'application/json') {
@@ -86,14 +91,11 @@ export default {
 		// 	);
 		// }
 
-		// curSegment targets given rpc url index
-		return await fetchWithRetries(RPC_POOL, options, curSegment - 1, timestamp, logClient).then(
-			res => {
-				return new Response(res.body, {
-					status: res.status,
-					headers: respHeaders,
-				});
-			}
-		);
+		return await fetch(proxyRequest).then(res => {
+			return new Response(res.body, {
+				status: res.status,
+				headers: respHeaders,
+			});
+		});
 	},
 };
