@@ -56,7 +56,6 @@ export default {
 		// calculates if origin is prod - splites all other traffic to dev rpc
 		const RPC_POOL = env.RPC_URL.split(',');
 		const H_INDEX = RPC_POOL.findIndex(i => i.includes('helius'))
-		const Q_INDEX = RPC_POOL.findIndex(i => i.includes('quiknode'));
 
 		const upgradeHeader = request.headers.get('Upgrade');
 		if (upgradeHeader || upgradeHeader === 'websocket') {
@@ -79,7 +78,7 @@ export default {
 			},
 		};
 
-		const proxyRequest = new Request(RPC_POOL[Q_INDEX], options);
+		const proxyRequest = new Request(RPC_POOL[0], options);
 
 		// const reqContentType = request.headers.get('content-type');
 		// if (reqContentType !== 'application/json') {
